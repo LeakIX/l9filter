@@ -1,4 +1,4 @@
-# IP4scout
+# l9filter
 
 [![GitHub Release](https://img.shields.io/github/v/release/LeakIX/l9filter)](https://github.com/LeakIX/l9filter/releases)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/leak_ix.svg?logo=twitter)](https://twitter.com/leak_ix)
