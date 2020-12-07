@@ -65,7 +65,7 @@ The installation is easy. You can download the pre-built binaries for your platf
 l9filter requires an input to run. By default `stdin` will be used unles `input-file` is specified.
 
 ```sh
-▶ l9filter -i l9 -o hostport
+▶ l9filter transform -i l9 -o hostport
 ```
 
 ## Examples
@@ -77,7 +77,7 @@ Parsing its output would look like :
 ### Human output
 
 ```sh 
-▶ ip4scout random --ports=3306,9200,6379|tee results.json|l9filter -i l9 -o human
+▶ ip4scout random --ports=3306,9200,6379|tee results.json|l9filter transform -i l9 -o human
 ```
 
 Displays human-readable results on `stdout` while saving the scan results to `results.json` 
@@ -86,7 +86,7 @@ Displays human-readable results on `stdout` while saving the scan results to `re
 ### Hostport output
 
 ```sh 
-▶ ip4scout random -p 3304-3308,9200-9210|tee results.json|l9filter -i l9 -o hostport
+▶ ip4scout random -p 3304-3308,9200-9210|tee results.json|l9filter transform -i l9 -o hostport
 ```
 
 Will display `host:port` results on `stdout` while saving the scan results to `results.json` 
