@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"gitlab.nobody.run/tbi/core"
+	"github.com/LeakIX/l9format"
 	"io"
 )
 
@@ -22,14 +22,14 @@ func (t *HumanTransformer) Name() string {
 	return "human"
 }
 
-func (t *HumanTransformer) Decode() (hostService core.HostService, err error) {
-	return hostService, errors.New("can't speak human yet")
+func (t *HumanTransformer) Decode() (event l9format.L9Event, err error) {
+	return event, errors.New("can't speak human yet")
 }
 
-func (t *HumanTransformer) Encode(hostService core.HostService) error {
+func (t *HumanTransformer) Encode(event l9format.L9Event) error {
 	_, err := io.WriteString(t.Writer, fmt.Sprintf(
-		"IP: %s, PORT:%s, TYPE:%s, SCHEME:%s\n%s\n\n",
-		hostService.Ip, hostService.Port, hostService.Type, hostService.Scheme, hostService.Data))
+		"IP: %s, PORT:%s, PROTO:%s, SSL:%d\n%s\n\n",
+		event.Ip, event.Port, event.Protocol, event.SSL.Enabled, event.Summary))
 	if err != nil {
 		return err
 	}

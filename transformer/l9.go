@@ -3,7 +3,7 @@ package transformer
 import (
 	"bufio"
 	"encoding/json"
-	"gitlab.nobody.run/tbi/core"
+	"github.com/LeakIX/l9format"
 	"io"
 )
 
@@ -18,25 +18,25 @@ func NewJsonServiceTransformer() TransformerInterface{
 	return &JsonServiceTransformer{}
 }
 
-func (t *JsonServiceTransformer) Decode() (hostService core.HostService, err error) {
+func (t *JsonServiceTransformer) Decode() (event l9format.L9Event, err error) {
 	if t.scanner == nil {
 		t.scanner = bufio.NewScanner(t.Reader)
 	}
 	if t.scanner.Scan() {
-		err = json.Unmarshal(t.scanner.Bytes(), &hostService)
+		err = json.Unmarshal(t.scanner.Bytes(), &event)
 	} else {
-		return hostService, io.EOF
+		return event, io.EOF
 	}
-	return hostService, err
+	return event, err
 }
 
-func (t *JsonServiceTransformer) Encode(hostService core.HostService) error {
+func (t *JsonServiceTransformer) Encode(event l9format.L9Event) error {
 	if t.jsonEncoder == nil {
 		t.jsonEncoder = json.NewEncoder(t.Writer)
 	}
-	return t.jsonEncoder.Encode(hostService)
+	return t.jsonEncoder.Encode(event)
 }
 
 func (t *JsonServiceTransformer) Name() string {
-	return "json"
+	return "l9"
 }

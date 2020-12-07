@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"gitlab.nobody.run/tbi/core"
+	"github.com/LeakIX/l9format"
 	"io"
 	"net"
 	"strings"
@@ -24,34 +24,34 @@ func (t *HostPortTransformer) Name() string {
 	return "hostport"
 }
 
-func (t *HostPortTransformer) Decode() (hostService core.HostService, err error) {
+func (t *HostPortTransformer) Decode() (event l9format.L9Event, err error) {
 	if t.scanner == nil {
 		t.scanner = bufio.NewScanner(t.Reader)
 	}
 	if t.scanner.Scan() {
 		inputParts := strings.Split(t.scanner.Text(), ":")
 		if len(inputParts) < 2 {
-			return hostService, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
+			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
 		}
-		hostService.Port = inputParts[len(inputParts)-1]
-		host := strings.Trim(strings.TrimSuffix(t.scanner.Text(), ":" + hostService.Port), "[]")
+		event.Port = inputParts[len(inputParts)-1]
+		host := strings.Trim(strings.TrimSuffix(t.scanner.Text(), ":" + event.Port), "[]")
 		ip := net.ParseIP(host)
 		if ip != nil {
-			hostService.Ip = ip.String()
+			event.Ip = ip.String()
 		} else {
-			hostService.Hostname = host
+			event.Host = host
 		}
 	} else {
-		return hostService, io.EOF
+		return event, io.EOF
 	}
-	return hostService, err
+	return event, err
 }
 
-func (t *HostPortTransformer) Encode(hostService core.HostService) error {
-	if len(hostService.Hostname) < 1 {
-		hostService.Hostname = hostService.Ip
+func (t *HostPortTransformer) Encode(event l9format.L9Event) error {
+	if len(event.Host) < 1 {
+		event.Host = event.Ip
 	}
-	hostPortString := fmt.Sprintf("%s\n", net.JoinHostPort(hostService.Hostname, hostService.Port))
+	hostPortString := fmt.Sprintf("%s\n", net.JoinHostPort(event.Host, event.Port))
 	written, err := io.WriteString(t.Writer, hostPortString)
 	if err != nil {
 		return err

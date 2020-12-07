@@ -1,7 +1,7 @@
 package transformer
 
 import (
-	"gitlab.nobody.run/tbi/core"
+	"github.com/LeakIX/l9format"
 	"io"
 )
 
@@ -10,11 +10,12 @@ var Transformers = []TransformerInterface{
 	NewUrlServiceTransformer(),
 	NewHostPortTransformer(),
 	NewHumanTransformer(),
+	NewTbiCoreTransformer(),
 }
 
 type TransformerInterface interface {
-	Decode() (core.HostService, error)
-	Encode(hostService core.HostService) error
+	Decode() (l9format.L9Event, error)
+	Encode(event l9format.L9Event) error
 	Name() string
 	SetReader(reader io.Reader)
 	SetWriter(writer io.Writer)

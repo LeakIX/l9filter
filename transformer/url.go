@@ -4,11 +4,10 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"gitlab.nobody.run/tbi/core"
+	"github.com/LeakIX/l9format"
 	"io"
 	"net"
 	"net/url"
-	"strings"
 )
 
 type UrlServiceTransformer struct{
@@ -25,51 +24,52 @@ func (t *UrlServiceTransformer) Name() string {
 	return "url"
 }
 
-func (t *UrlServiceTransformer) Decode() (hostService core.HostService, err error) {
+func (t *UrlServiceTransformer) Decode() (event l9format.L9Event, err error) {
 	if t.scanner == nil {
 		t.scanner = bufio.NewScanner(t.Reader)
 	}
 	if t.scanner.Scan() {
 		parsedUrl, err := url.Parse(t.scanner.Text())
 		if err != nil {
-			return hostService, err
+			return event, err
 		}
-		hostService.Scheme = parsedUrl.Scheme
-		hostService.Type = parsedUrl.Scheme
-		hostService.Port = parsedUrl.Port()
-		hostService.Hostname = parsedUrl.Hostname()
+		event.Protocol = parsedUrl.Scheme
+		event.Port = parsedUrl.Port()
+		event.Host = parsedUrl.Hostname()
+		event.Http.Url =  parsedUrl.RequestURI()
+		event.Http.Root = parsedUrl.Path
+		event.Transports = []string{"tcp","http"}
 		ip := net.ParseIP(parsedUrl.Hostname())
 		if ip != nil {
-			hostService.Ip = ip.String()
+			event.Ip = ip.String()
 		}
-		if hostService.Scheme == "https" {
-			hostService.Type = "http"
+		if event.Protocol == "https" {
+			event.Transports = []string{"tcp","tls","http"}
+			event.SSL.Enabled = true
 		}
-		if hostService.Port == "" {
-			hostService.Port = SchemeDefaultPorts(parsedUrl.Scheme)
+		if event.Port == "" {
+			event.Port = SchemeDefaultPorts(parsedUrl.Scheme)
 		}
-		if hostService.Port == "" {
+		if event.Port == "" {
 			// Couldn't get a port
-			return hostService, errors.New("no_port")
+			return event, errors.New("no_port")
 		}
 	} else {
-		return hostService, io.EOF
+		return event, io.EOF
 	}
-	return hostService, err
+	return event, err
 }
 
-func (t *UrlServiceTransformer) Encode(hostService core.HostService) error {
-	if len(hostService.Hostname) < 1 {
-		hostService.Hostname = hostService.Ip
+func (t *UrlServiceTransformer) Encode(event l9format.L9Event) error {
+	if len(event.Host) < 1 {
+		event.Host = event.Ip
 	}
+	scheme := "http"
 	// best guess
-	if len(hostService.Scheme) < 1 {
-		hostService.Scheme = "http"
-		if strings.HasSuffix(hostService.Port, "443") {
-			hostService.Scheme = "https"
-		}
+	if event.SSL.Enabled {
+		scheme = "https"
 	}
-	urlString := fmt.Sprintf("%s://%s\n", hostService.Scheme, net.JoinHostPort(hostService.Hostname, hostService.Port))
+	urlString := fmt.Sprintf("%s://%s\n", scheme, net.JoinHostPort(event.Host, event.Port))
 	written, err := io.WriteString(t.Writer, urlString)
 	if err != nil {
 		return err
