@@ -28,6 +28,20 @@ Displays help for the random command (only implementation atm)
 |--source-file        |Use an input file instead of stdin|
 |--target-file        |Use an output file instead of stdout|
 
+
+## Supported formats
+
+The following formats are supported 
+
+|Format           |Description  |
+|-----------------------|-------------------------------------------------------|
+| l9       | JSON based l9format |
+| hostport | <host>:<port> conversion |
+| url      | Handles URL conversion |
+| human        | Human readable format (output only) |
+
+More are coming ( nmap port list, masscan, project-discovery, ect ...)
+
 ## Installation Instructions
 
 ### From Binary
