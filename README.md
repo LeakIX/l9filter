@@ -36,11 +36,12 @@ The following formats are supported
 |Format           |Description  |
 |-----------------------|-------------------------------------------------------|
 | l9       | JSON based l9format |
+| nmap     | Nmap format |
+| masscan     | masscan default format |
 | hostport | `<host>:<port>` conversion |
 | url      | Handles URL conversion |
 | human        | Human readable format (output only) |
 
-More are coming ( nmap port list, masscan, project-discovery, ect ...)
 
 ## Installation Instructions
 
@@ -82,11 +83,19 @@ Parsing its output would look like :
 
 Displays human-readable results on `stdout` while saving the scan results to `results.json` 
 
-
-### Hostport output
+### Send to any l9 tool
 
 ```sh 
-▶ ip4scout random -p 3304-3308,9200-9210|tee results.json|l9filter transform -i l9 -o hostport
+▶ masscan -rate=10000 -p1-1024 192.168.0.0/24|l9filter transform -i masscan -o l9|l9tcpid service --max-threads=100 > services.json 
 ```
 
-Will display `host:port` results on `stdout` while saving the scan results to `results.json` 
+Run masscan, transform its output to l9format, send live results to l9tcpid and save the final
+work to `services.json`.
+
+### Human output
+
+```sh 
+l9filter transform -s services.json -i l9 -o human 
+```
+
+Reads l9formatted lines from services.json and outputs human-readable format to `stdout`

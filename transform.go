@@ -1,6 +1,7 @@
 package l9filter
 
 import (
+	"errors"
 	"github.com/LeakIX/l9filter/transformer"
 	"io"
 	"os"
@@ -52,9 +53,23 @@ func (cmd *TransformCommand) Run() error {
 			cmd.OutputTransformer = trs
 		}
 	}
+	if cmd.InputTransformer == nil {
+		return errors.New("input format doesn't exists")
+	}
+	if cmd.OutputTransformer == nil {
+		return errors.New("output format doesn't exists")
+	}
 	for {
 		event, err := cmd.InputTransformer.Decode()
 		if  err != nil {
+			if _, isNoDataError := err.(*transformer.NoDataError); isNoDataError {
+				// Happens when we meet comments ect ... we can safely skip
+				continue
+			}
+			if err.Error() == "EOF" {
+				// We done with input, close output and leave
+				os.Exit(0)
+			}
 			return err
 		}
 		err = cmd.OutputTransformer.Encode(event)

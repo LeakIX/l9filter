@@ -7,7 +7,7 @@ import (
 
 
 var App struct {
-	Filter l9filter.TransformCommand `cmd help:"Takes input and transforms it " default:"1"`
+	Transform l9filter.TransformCommand `cmd help:"Takes input and transforms it " default:"1"`
 }
 func main() {
 	ctx := kong.Parse(&App)
