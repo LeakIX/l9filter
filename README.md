@@ -36,7 +36,7 @@ The following formats are supported
 |Format           |Description  |
 |-----------------------|-------------------------------------------------------|
 | l9       | JSON based l9format |
-| hostport | <host>:<port> conversion |
+| hostport | `<host>:<port>` conversion |
 | url      | Handles URL conversion |
 | human        | Human readable format (output only) |
 
