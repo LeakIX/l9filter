@@ -3,7 +3,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/LeakIX/l9filter)](https://github.com/LeakIX/l9filter/releases)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/leak_ix.svg?logo=twitter)](https://twitter.com/leak_ix)
 
-l9filter is a translation tool for stdin/stdout that understand the l9format. Its main goal is to facilitate data communication
+l9filter is a translation tool for stdin/stdout that understand the [l9format](https://github.com/LeakIX/l9format). Its main goal is to facilitate data communication
 between different network recon software.  
 
 ## Features
