@@ -35,9 +35,15 @@ func (t *NmapTransformer) Decode() (event l9format.L9Event, err error) {
 		if strings.HasPrefix(t.scanner.Text(), "#") {
 			return event, NewNoDataError("commented line")
 		}
+		if t.scanner.Text() == "" {
+			return event, NewNoDataError("empty line")
+		}
 		inputParts := strings.Fields(t.scanner.Text())
 		if len(inputParts) < 5 {
 			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
+		}
+		if inputParts[3] != "Ports:" {
+			return event, NewNoDataError("other line")
 		}
 		portParts := strings.Split(inputParts[len(inputParts)-1],"/")
 		if len(portParts) < 3 {
