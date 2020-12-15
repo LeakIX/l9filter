@@ -3,13 +3,13 @@ package transformer
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"github.com/LeakIX/l9format"
-	"io"
 )
 
 type JsonServiceTransformer struct{
 	Transformer
-	scanner *bufio.Scanner
+	reader *bufio.Reader
 	jsonEncoder *json.Encoder
 }
 
@@ -19,13 +19,14 @@ func NewJsonServiceTransformer() TransformerInterface{
 }
 
 func (t *JsonServiceTransformer) Decode() (event l9format.L9Event, err error) {
-	if t.scanner == nil {
-		t.scanner = bufio.NewScanner(t.Reader)
+	if t.reader == nil {
+		t.reader = bufio.NewReaderSize(t.Reader, 256*1024)
 	}
-	if t.scanner.Scan() {
-		err = json.Unmarshal(t.scanner.Bytes(), &event)
-	} else {
-		return event, io.EOF
+	bytes, isPrefix, err := t.reader.ReadLine()
+	if err == nil && !isPrefix {
+		err = json.Unmarshal(bytes, &event)
+	} else if isPrefix {
+		err = errors.New("line buffer overflow")
 	}
 	return event, err
 }
