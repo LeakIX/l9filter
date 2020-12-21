@@ -7,14 +7,13 @@ import (
 	"github.com/LeakIX/l9format"
 )
 
-type JsonServiceTransformer struct{
+type JsonServiceTransformer struct {
 	Transformer
-	reader *bufio.Reader
+	reader      *bufio.Reader
 	jsonEncoder *json.Encoder
 }
 
-
-func NewJsonServiceTransformer() TransformerInterface{
+func NewJsonServiceTransformer() TransformerInterface {
 	return &JsonServiceTransformer{}
 }
 

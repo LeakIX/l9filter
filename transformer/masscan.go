@@ -10,13 +10,12 @@ import (
 	"strings"
 )
 
-type MasscanTransformer struct{
+type MasscanTransformer struct {
 	Transformer
 	scanner *bufio.Scanner
 }
 
-
-func NewMasscanTransformer() TransformerInterface{
+func NewMasscanTransformer() TransformerInterface {
 	return &MasscanTransformer{}
 }
 
@@ -36,7 +35,7 @@ func (t *MasscanTransformer) Decode() (event l9format.L9Event, err error) {
 		if len(inputParts) < 6 {
 			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
 		}
-		portParts := strings.Split(inputParts[len(inputParts)-3],"/")
+		portParts := strings.Split(inputParts[len(inputParts)-3], "/")
 		if len(portParts) < 2 {
 			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
 		}
@@ -61,7 +60,7 @@ func (t *MasscanTransformer) Encode(event l9format.L9Event) error {
 		// default to tcp
 		event.Protocol = "tcp"
 	}
-	hostPortString := fmt.Sprintf("Discovered open port %s/%s on %s\n", event.Port,event.Protocol,event.Host )
+	hostPortString := fmt.Sprintf("Discovered open port %s/%s on %s\n", event.Port, event.Protocol, event.Host)
 	written, err := io.WriteString(t.Writer, hostPortString)
 	if err != nil {
 		return err

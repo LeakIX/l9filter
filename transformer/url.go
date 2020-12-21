@@ -10,13 +10,12 @@ import (
 	"net/url"
 )
 
-type UrlServiceTransformer struct{
+type UrlServiceTransformer struct {
 	Transformer
 	scanner *bufio.Scanner
 }
 
-
-func NewUrlServiceTransformer() TransformerInterface{
+func NewUrlServiceTransformer() TransformerInterface {
 	return &UrlServiceTransformer{}
 }
 
@@ -36,15 +35,15 @@ func (t *UrlServiceTransformer) Decode() (event l9format.L9Event, err error) {
 		event.Protocol = parsedUrl.Scheme
 		event.Port = parsedUrl.Port()
 		event.Host = parsedUrl.Hostname()
-		event.Http.Url =  parsedUrl.RequestURI()
+		event.Http.Url = parsedUrl.RequestURI()
 		event.Http.Root = parsedUrl.Path
-		event.Transports = []string{"tcp","http"}
+		event.Transports = []string{"tcp", "http"}
 		ip := net.ParseIP(parsedUrl.Hostname())
 		if ip != nil {
 			event.Ip = ip.String()
 		}
 		if event.Protocol == "https" {
-			event.Transports = []string{"tcp","tls","http"}
+			event.Transports = []string{"tcp", "tls", "http"}
 			event.SSL.Enabled = true
 		}
 		if event.Port == "" {
@@ -86,7 +85,7 @@ var schemeDefaultPorts = map[string]string{
 	"socks5": "1080",
 	"ws":     "80",
 	"wss":    "443",
-	"ftp":	  "21",
+	"ftp":    "21",
 	"mysql":  "3306",
 	"ssh":    "22",
 }

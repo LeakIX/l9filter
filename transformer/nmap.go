@@ -10,22 +10,18 @@ import (
 	"strings"
 )
 
-type NmapTransformer struct{
+type NmapTransformer struct {
 	Transformer
 	scanner *bufio.Scanner
 }
 
-
-func NewNmapTransformer() TransformerInterface{
+func NewNmapTransformer() TransformerInterface {
 	return &NmapTransformer{}
 }
 
 func (t *NmapTransformer) Name() string {
 	return "nmap"
 }
-
-
-
 
 func (t *NmapTransformer) Decode() (event l9format.L9Event, err error) {
 	if t.scanner == nil {
@@ -45,7 +41,7 @@ func (t *NmapTransformer) Decode() (event l9format.L9Event, err error) {
 		if inputParts[3] != "Ports:" {
 			return event, NewNoDataError("other line")
 		}
-		portParts := strings.Split(inputParts[len(inputParts)-1],"/")
+		portParts := strings.Split(inputParts[len(inputParts)-1], "/")
 		if len(portParts) < 3 {
 			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
 		}

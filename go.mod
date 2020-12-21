@@ -3,7 +3,7 @@ module github.com/LeakIX/l9filter
 go 1.15
 
 require (
-	github.com/LeakIX/l9format v0.6.0
+	github.com/LeakIX/l9format v0.7.1
 	github.com/Machiel/slugify v1.0.1 // indirect
 	github.com/alecthomas/kong v0.2.12
 	github.com/pkg/errors v0.9.1 // indirect

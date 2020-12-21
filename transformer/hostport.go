@@ -10,13 +10,12 @@ import (
 	"strings"
 )
 
-type HostPortTransformer struct{
+type HostPortTransformer struct {
 	Transformer
 	scanner *bufio.Scanner
 }
 
-
-func NewHostPortTransformer() TransformerInterface{
+func NewHostPortTransformer() TransformerInterface {
 	return &HostPortTransformer{}
 }
 
@@ -34,7 +33,7 @@ func (t *HostPortTransformer) Decode() (event l9format.L9Event, err error) {
 			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
 		}
 		event.Port = inputParts[len(inputParts)-1]
-		host := strings.Trim(strings.TrimSuffix(t.scanner.Text(), ":" + event.Port), "[]")
+		host := strings.Trim(strings.TrimSuffix(t.scanner.Text(), ":"+event.Port), "[]")
 		ip := net.ParseIP(host)
 		if ip != nil {
 			event.Ip = ip.String()

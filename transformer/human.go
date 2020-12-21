@@ -8,13 +8,12 @@ import (
 	"io"
 )
 
-type HumanTransformer struct{
+type HumanTransformer struct {
 	Transformer
 	scanner *bufio.Scanner
 }
 
-
-func NewHumanTransformer() TransformerInterface{
+func NewHumanTransformer() TransformerInterface {
 	return &HumanTransformer{}
 }
 
@@ -29,7 +28,7 @@ func (t *HumanTransformer) Decode() (event l9format.L9Event, err error) {
 func (t *HumanTransformer) Encode(event l9format.L9Event) error {
 	_, err := io.WriteString(t.Writer, fmt.Sprintf(
 		"IP: %s, PORT:%s, PROTO:%s, SSL:%t\n%.1024s\n\n",
-		event.Ip, event.Port, event.Protocol, event.SSL.Enabled , event.Summary))
+		event.Ip, event.Port, event.Protocol, event.SSL.Enabled, event.Summary))
 	if err != nil {
 		return err
 	}

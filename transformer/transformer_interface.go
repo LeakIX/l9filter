@@ -28,10 +28,9 @@ type Transformer struct {
 	Writer io.Writer
 }
 
-func (t *Transformer) SetReader(reader io.Reader)  {
+func (t *Transformer) SetReader(reader io.Reader) {
 	t.Reader = reader
 }
-
 
 func (t *Transformer) SetWriter(writer io.Writer) {
 	t.Writer = writer

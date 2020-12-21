@@ -4,23 +4,21 @@ import (
 	"errors"
 	"github.com/LeakIX/l9filter/transformer"
 	"io"
-	"os"
 	"log"
+	"os"
 )
 
-
 type TransformCommand struct {
-	InputFormat string `required help:"input format" short:"i"`
-	OutputFormat string `required help:"output format" short:"o"`
-	SourceFile string `help:"Input file, stdin if none" short:"s"`
-	TargetFile string `help:"Output file, stdout if none" short:"f"`
-	PortFilter string `help:"Filter on port" short:"p"`
-	TypeFilter string `help:"Filter on type" short:"t"`
-	InputTransformer transformer.TransformerInterface `kong:"-"`
+	InputFormat       string                           `required help:"input format" short:"i"`
+	OutputFormat      string                           `required help:"output format" short:"o"`
+	SourceFile        string                           `help:"Input file, stdin if none" short:"s"`
+	TargetFile        string                           `help:"Output file, stdout if none" short:"f"`
+	PortFilter        string                           `help:"Filter on port" short:"p"`
+	TypeFilter        string                           `help:"Filter on type" short:"t"`
+	InputTransformer  transformer.TransformerInterface `kong:"-"`
 	OutputTransformer transformer.TransformerInterface `kong:"-"`
-	LogWriter io.Writer `kong:"-"`
+	LogWriter         io.Writer                        `kong:"-"`
 }
-
 
 func (cmd *TransformCommand) Run() error {
 	for _, trs := range transformer.Transformers {
@@ -33,7 +31,7 @@ func (cmd *TransformCommand) Run() error {
 				}
 				trs.SetReader(inputFile)
 			}
-			log.Println("selected input : " + trs.Name())
+			log.Println("selected input: " + trs.Name())
 			cmd.InputTransformer = trs
 		}
 		if cmd.OutputFormat == trs.Name() {
@@ -49,7 +47,7 @@ func (cmd *TransformCommand) Run() error {
 				}
 				trs.SetWriter(outputFile)
 			}
-			log.Println("selected input :  " + trs.Name())
+			log.Println("selected output: " + trs.Name())
 			cmd.OutputTransformer = trs
 		}
 	}
@@ -61,7 +59,7 @@ func (cmd *TransformCommand) Run() error {
 	}
 	for {
 		event, err := cmd.InputTransformer.Decode()
-		if  err != nil {
+		if err != nil {
 			if _, isNoDataError := err.(*transformer.NoDataError); isNoDataError {
 				// Happens when we meet comments ect ... we can safely skip
 				continue
