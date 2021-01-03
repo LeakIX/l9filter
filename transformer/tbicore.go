@@ -24,7 +24,7 @@ func NewTbiCoreTransformer() TransformerInterface {
 
 func (t *TbiCoreTransformer) Decode() (event l9format.L9Event, err error) {
 	if t.reader == nil {
-		t.reader = bufio.NewReaderSize(t.Reader, 256*1024)
+		t.reader = bufio.NewReaderSize(t.Reader, 1024*1024)
 	}
 	hostServiceLeak := &core.HostServiceLeak{}
 	hostService := &core.HostService{}
