@@ -19,7 +19,7 @@ func NewJsonServiceTransformer() TransformerInterface {
 
 func (t *JsonServiceTransformer) Decode() (event l9format.L9Event, err error) {
 	if t.reader == nil {
-		t.reader = bufio.NewReaderSize(t.Reader, 256*1024)
+		t.reader = bufio.NewReaderSize(t.Reader, 1024*1024)
 	}
 	bytes, isPrefix, err := t.reader.ReadLine()
 	if err == nil && !isPrefix {
