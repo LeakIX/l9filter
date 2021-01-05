@@ -7,6 +7,7 @@ import (
 
 var Transformers = []TransformerInterface{
 	NewJsonServiceTransformer(),
+	NewDnsxTransformer(),
 	NewUrlServiceTransformer(),
 	NewHostPortTransformer(),
 	NewHumanTransformer(),
@@ -16,7 +17,7 @@ var Transformers = []TransformerInterface{
 }
 
 type TransformerInterface interface {
-	Decode() (l9format.L9Event, error)
+	Decode(outputTransformer TransformerInterface) error
 	Encode(event l9format.L9Event) error
 	Name() string
 	SetReader(reader io.Reader)

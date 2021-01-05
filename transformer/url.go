@@ -23,21 +23,25 @@ func (t *UrlServiceTransformer) Name() string {
 	return "url"
 }
 
-func (t *UrlServiceTransformer) Decode() (event l9format.L9Event, err error) {
+func (t *UrlServiceTransformer) Decode(outputTransformer TransformerInterface) (err error) {
 	if t.scanner == nil {
 		t.scanner = bufio.NewScanner(t.Reader)
 	}
 	if t.scanner.Scan() {
 		parsedUrl, err := url.Parse(t.scanner.Text())
 		if err != nil {
-			return event, err
+			return err
 		}
-		event.Protocol = parsedUrl.Scheme
-		event.Port = parsedUrl.Port()
-		event.Host = parsedUrl.Hostname()
-		event.Http.Url = parsedUrl.RequestURI()
-		event.Http.Root = parsedUrl.Path
-		event.Transports = []string{"tcp", "http"}
+		event := l9format.L9Event{
+			Protocol: parsedUrl.Scheme,
+			Port:     parsedUrl.Port(),
+			Host:     parsedUrl.Hostname(),
+			Http: l9format.L9HttpEvent{
+				Url:  parsedUrl.RequestURI(),
+				Root: parsedUrl.Path,
+			},
+			Transports: []string{"tcp", "http"},
+		}
 		ip := net.ParseIP(parsedUrl.Hostname())
 		if ip != nil {
 			event.Ip = ip.String()
@@ -51,12 +55,11 @@ func (t *UrlServiceTransformer) Decode() (event l9format.L9Event, err error) {
 		}
 		if event.Port == "" {
 			// Couldn't get a port
-			return event, errors.New("no_port")
+			return errors.New("no_port")
 		}
-	} else {
-		return event, io.EOF
+		return outputTransformer.Encode(event)
 	}
-	return event, err
+	return io.EOF
 }
 
 func (t *UrlServiceTransformer) Encode(event l9format.L9Event) error {

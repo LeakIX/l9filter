@@ -58,7 +58,7 @@ func (cmd *TransformCommand) Run() error {
 		return errors.New("output format doesn't exists")
 	}
 	for {
-		event, err := cmd.InputTransformer.Decode()
+		err := cmd.InputTransformer.Decode(cmd.OutputTransformer)
 		if err != nil {
 			if _, isNoDataError := err.(*transformer.NoDataError); isNoDataError {
 				// Happens when we meet comments ect ... we can safely skip
@@ -68,10 +68,6 @@ func (cmd *TransformCommand) Run() error {
 				// We done with input, close output and leave
 				os.Exit(0)
 			}
-			return err
-		}
-		err = cmd.OutputTransformer.Encode(event)
-		if err != nil {
 			return err
 		}
 	}

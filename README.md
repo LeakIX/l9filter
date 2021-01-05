@@ -41,7 +41,8 @@ The following formats are supported
 | hostport | `<host>:<port>` conversion |
 | url      | Handles URL conversion |
 | human        | Human readable format (output only) |
-
+| dnsx | Handles DNS resolution from [dnsx](https://github.com/projectdiscovery/dnsx)'s json output
+| tbicore | Handles [LeakIX API](https://leakix.net/api-documentation)'s schema |
 
 ## Installation Instructions
 

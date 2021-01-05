@@ -23,33 +23,35 @@ func (t *MasscanTransformer) Name() string {
 	return "masscan"
 }
 
-func (t *MasscanTransformer) Decode() (event l9format.L9Event, err error) {
+func (t *MasscanTransformer) Decode(outputTransformer TransformerInterface) (err error) {
 	if t.scanner == nil {
 		t.scanner = bufio.NewScanner(t.Reader)
 	}
 	if t.scanner.Scan() {
 		if strings.HasPrefix(t.scanner.Text(), "#") {
-			return event, NewNoDataError("commented line")
+			return NewNoDataError("commented line")
 		}
 		inputParts := strings.Fields(t.scanner.Text())
 		if len(inputParts) < 6 {
-			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
+			return errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
 		}
 		portParts := strings.Split(inputParts[len(inputParts)-3], "/")
 		if len(portParts) < 2 {
-			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
+			return errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
 		}
-		event.Port = portParts[0]
-		event.Protocol = portParts[1]
-		event.Host = strings.TrimSuffix(inputParts[len(inputParts)-1], "[]")
+		event := l9format.L9Event{
+			Port:     portParts[0],
+			Protocol: portParts[1],
+			Host:     strings.TrimSuffix(inputParts[len(inputParts)-1], "[]"),
+		}
+
 		ip := net.ParseIP(event.Host)
 		if ip != nil {
 			event.Ip = ip.String()
 		}
-	} else {
-		return event, io.EOF
+		return outputTransformer.Encode(event)
 	}
-	return event, err
+	return io.EOF
 }
 
 func (t *MasscanTransformer) Encode(event l9format.L9Event) error {

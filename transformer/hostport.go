@@ -23,16 +23,19 @@ func (t *HostPortTransformer) Name() string {
 	return "hostport"
 }
 
-func (t *HostPortTransformer) Decode() (event l9format.L9Event, err error) {
+func (t *HostPortTransformer) Decode(outputTransformer TransformerInterface) (err error) {
 	if t.scanner == nil {
 		t.scanner = bufio.NewScanner(t.Reader)
 	}
 	if t.scanner.Scan() {
 		inputParts := strings.Split(t.scanner.Text(), ":")
 		if len(inputParts) < 2 {
-			return event, errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
+			return errors.New(fmt.Sprintf("couldn't parse %s", t.scanner.Text()))
 		}
-		event.Port = inputParts[len(inputParts)-1]
+		event := l9format.L9Event{
+			Port: inputParts[len(inputParts)-1],
+		}
+
 		host := strings.Trim(strings.TrimSuffix(t.scanner.Text(), ":"+event.Port), "[]")
 		ip := net.ParseIP(host)
 		if ip != nil {
@@ -40,10 +43,9 @@ func (t *HostPortTransformer) Decode() (event l9format.L9Event, err error) {
 		} else {
 			event.Host = host
 		}
-	} else {
-		return event, io.EOF
+		return outputTransformer.Encode(event)
 	}
-	return event, err
+	return io.EOF
 }
 
 func (t *HostPortTransformer) Encode(event l9format.L9Event) error {

@@ -22,7 +22,7 @@ func NewTbiCoreTransformer() TransformerInterface {
 	return &TbiCoreTransformer{}
 }
 
-func (t *TbiCoreTransformer) Decode() (event l9format.L9Event, err error) {
+func (t *TbiCoreTransformer) Decode(outputTransformer TransformerInterface) (err error) {
 	if t.reader == nil {
 		t.reader = bufio.NewReaderSize(t.Reader, 1024*1024)
 	}
@@ -32,21 +32,29 @@ func (t *TbiCoreTransformer) Decode() (event l9format.L9Event, err error) {
 	if err == nil && !isPrefix {
 		err = json.Unmarshal(bytes, &hostServiceLeak)
 		if err != nil {
-			return event, err
+			return err
 		}
 		err = json.Unmarshal(bytes, &hostService)
 		if err != nil {
-			return event, err
+			return err
 		}
 		if len(hostServiceLeak.Plugin) > 0 {
-			event, err = t.decodeLeak(hostServiceLeak)
+			event, err := t.decodeLeak(hostServiceLeak)
+			if err != nil {
+				return err
+			}
+			return outputTransformer.Encode(event)
 		} else {
-			event, err = t.decodeService(hostService)
+			event, err := t.decodeService(hostService)
+			if err != nil {
+				return err
+			}
+			return outputTransformer.Encode(event)
 		}
 	} else if isPrefix {
 		err = errors.New("line buffer overflow")
 	}
-	return event, err
+	return err
 }
 
 func (t *TbiCoreTransformer) decodeService(hostService *core.HostService) (l9format.L9Event, error) {
@@ -156,16 +164,12 @@ func (t *TbiCoreTransformer) Encode(event l9format.L9Event) error {
 	switch event.EventType {
 	case "leak":
 		return t.encodeLeak(event)
-	case "service":
-		return t.encodeService(event)
 	default:
-		return errors.New("unknown l9event type")
+		return t.encodeService(event)
 	}
 }
 
 func (t *TbiCoreTransformer) encodeService(event l9format.L9Event) error {
-	//headers
-	//software modules
 	hostService := &core.HostService{
 		Ip:   event.Ip,
 		Port: event.Port,
