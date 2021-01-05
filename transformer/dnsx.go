@@ -1,9 +1,7 @@
 package transformer
 
 import (
-	"bufio"
 	"encoding/json"
-	"errors"
 	"github.com/LeakIX/l9format"
 	"github.com/projectdiscovery/retryabledns"
 	"time"
@@ -11,7 +9,6 @@ import (
 
 type DnsxTransformer struct {
 	Transformer
-	reader      *bufio.Reader
 	jsonEncoder *json.Encoder
 }
 
@@ -20,17 +17,13 @@ func NewDnsxTransformer() TransformerInterface {
 }
 
 func (t *DnsxTransformer) Decode(outputTransformer TransformerInterface) (err error) {
-	if t.reader == nil {
-		t.reader = bufio.NewReaderSize(t.Reader, 1024*1024)
-	}
-	dnsxLine := &retryabledns.DNSData{}
-	bytes, isPrefix, err := t.reader.ReadLine()
-	if err == nil && !isPrefix {
-		err = json.Unmarshal(bytes, &dnsxLine)
+	jsonDecoder := json.NewDecoder(t.Reader)
+	for {
+		dnsxLine := retryabledns.DNSData{}
+		err = jsonDecoder.Decode(&dnsxLine)
 		if err != nil {
 			return err
 		}
-		// Output a l9event for each A record
 		for _, ip := range dnsxLine.A {
 			err = outputTransformer.Encode(l9format.L9Event{
 				EventType: "resolve",
@@ -49,13 +42,12 @@ func (t *DnsxTransformer) Decode(outputTransformer TransformerInterface) (err er
 					Host:      cname,
 					Time:      time.Now(),
 				})
+				if err != nil {
+					return err
+				}
 			}
 		}
-		//Do stuff here
-	} else if isPrefix {
-		err = errors.New("line buffer overflow")
 	}
-	return err
 }
 
 func (t *DnsxTransformer) Encode(event l9format.L9Event) error {
