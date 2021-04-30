@@ -10,6 +10,7 @@ import (
 type DnsxTransformer struct {
 	Transformer
 	jsonEncoder *json.Encoder
+	jsonDecoder *json.Decoder
 }
 
 func NewDnsxTransformer() TransformerInterface {
@@ -17,10 +18,12 @@ func NewDnsxTransformer() TransformerInterface {
 }
 
 func (t *DnsxTransformer) Decode(outputTransformer TransformerInterface) (err error) {
-	jsonDecoder := json.NewDecoder(t.Reader)
+	if t.jsonDecoder == nil {
+		t.jsonDecoder = json.NewDecoder(t.Reader)
+	}
 	for {
 		dnsxLine := retryabledns.DNSData{}
-		err = jsonDecoder.Decode(&dnsxLine)
+		err = t.jsonDecoder.Decode(&dnsxLine)
 		if err != nil {
 			return err
 		}

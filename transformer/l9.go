@@ -8,6 +8,7 @@ import (
 type JsonServiceTransformer struct {
 	Transformer
 	jsonEncoder *json.Encoder
+	jsonDecoder *json.Decoder
 }
 
 func NewJsonServiceTransformer() TransformerInterface {
@@ -15,10 +16,12 @@ func NewJsonServiceTransformer() TransformerInterface {
 }
 
 func (t *JsonServiceTransformer) Decode(outputTransformer TransformerInterface) (err error) {
-	jsonDecoder := json.NewDecoder(t.Reader)
+	if t.jsonDecoder == nil {
+		t.jsonDecoder = json.NewDecoder(t.Reader)
+	}
 	for {
 		event := l9format.L9Event{}
-		err = jsonDecoder.Decode(&event)
+		err = t.jsonDecoder.Decode(&event)
 		if err != nil {
 			return err
 		}

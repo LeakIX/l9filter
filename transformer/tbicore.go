@@ -3,9 +3,7 @@
 package transformer
 
 import (
-	"bufio"
 	"encoding/json"
-	"errors"
 	"github.com/LeakIX/l9format"
 	"gitlab.nobody.run/tbi/core"
 	"strings"
@@ -14,8 +12,8 @@ import (
 
 type TbiCoreTransformer struct {
 	Transformer
-	reader      *bufio.Reader
 	jsonEncoder *json.Encoder
+	jsonDecoder *json.Decoder
 }
 
 func NewTbiCoreTransformer() TransformerInterface {
@@ -23,38 +21,42 @@ func NewTbiCoreTransformer() TransformerInterface {
 }
 
 func (t *TbiCoreTransformer) Decode(outputTransformer TransformerInterface) (err error) {
-	if t.reader == nil {
-		t.reader = bufio.NewReaderSize(t.Reader, 1024*1024)
+	if t.jsonDecoder == nil {
+		t.jsonDecoder = json.NewDecoder(t.Reader)
 	}
-	hostServiceLeak := &core.HostServiceLeak{}
+	var jsonPayload json.RawMessage
+	err = t.jsonDecoder.Decode(&jsonPayload)
+	if err != nil {
+		return err
+	}
+	checkEvent := &TbiCheckEvent{}
+	err = json.Unmarshal(jsonPayload, &checkEvent)
+	if err != nil {
+		return err
+	}
+
+	if len(checkEvent.Plugin) > 0 {
+		hostServiceLeak := &core.HostServiceLeak{}
+		err = json.Unmarshal(jsonPayload, &hostServiceLeak)
+		if err != nil {
+			return err
+		}
+		event, err := t.decodeLeak(hostServiceLeak)
+		if err != nil {
+			return err
+		}
+		return outputTransformer.Encode(event)
+	}
 	hostService := &core.HostService{}
-	bytes, isPrefix, err := t.reader.ReadLine()
-	if err == nil && !isPrefix {
-		err = json.Unmarshal(bytes, &hostServiceLeak)
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(bytes, &hostService)
-		if err != nil {
-			return err
-		}
-		if len(hostServiceLeak.Plugin) > 0 {
-			event, err := t.decodeLeak(hostServiceLeak)
-			if err != nil {
-				return err
-			}
-			return outputTransformer.Encode(event)
-		} else {
-			event, err := t.decodeService(hostService)
-			if err != nil {
-				return err
-			}
-			return outputTransformer.Encode(event)
-		}
-	} else if isPrefix {
-		err = errors.New("line buffer overflow")
+	err = json.Unmarshal(jsonPayload, &hostService)
+	if err != nil {
+		return err
 	}
-	return err
+	event, err := t.decodeService(hostService)
+	if err != nil {
+		return err
+	}
+	return outputTransformer.Encode(event)
 }
 
 func (t *TbiCoreTransformer) decodeService(hostService *core.HostService) (l9format.L9Event, error) {
@@ -137,7 +139,6 @@ func (t *TbiCoreTransformer) decodeLeak(hostServiceLeak *core.HostServiceLeak) (
 		Summary:       hostServiceLeak.Data,
 		Time:          time.Unix(hostServiceLeak.Date, 0),
 		Leak: l9format.L9LeakEvent{
-			Data: hostServiceLeak.Data,
 			Dataset: l9format.DatasetSummary{
 				Rows:        hostServiceLeak.DatasetLeak.TotalRows,
 				Size:        hostServiceLeak.DatasetLeak.TotalSizeByte,
@@ -218,6 +219,8 @@ func (t *TbiCoreTransformer) encodeService(event l9format.L9Event) error {
 			Fingerprint: softwareModule.Fingerprint,
 		})
 	}
+	hostService.DeferSave()
+
 	return t.jsonEncoder.Encode(hostService)
 }
 
@@ -227,7 +230,7 @@ func (t *TbiCoreTransformer) encodeLeak(event l9format.L9Event) error {
 		Port:     event.Port,
 		Type:     event.Protocol,
 		Date:     event.Time.Unix(),
-		Data:     event.Leak.Data,
+		Data:     event.Summary,
 		Plugin:   event.EventSource,
 		Hostname: event.Host,
 		Reverse:  event.Reverse,
@@ -244,4 +247,8 @@ func (t *TbiCoreTransformer) encodeLeak(event l9format.L9Event) error {
 
 func (t *TbiCoreTransformer) Name() string {
 	return "tbicore"
+}
+
+type TbiCheckEvent struct {
+	Plugin string `json:"plugin"`
 }
