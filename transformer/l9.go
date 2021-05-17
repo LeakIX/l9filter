@@ -36,6 +36,9 @@ func (t *JsonServiceTransformer) Encode(event l9format.L9Event) error {
 	if t.jsonEncoder == nil {
 		t.jsonEncoder = json.NewEncoder(t.Writer)
 	}
+	for _, source := range L9Sources {
+		event.EventPipeline = append([]string{source}, event.EventPipeline...)
+	}
 	return t.jsonEncoder.Encode(event)
 }
 

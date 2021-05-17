@@ -42,7 +42,9 @@ The following formats are supported
 | url      | Handles URL conversion |
 | human        | Human readable format (output only) |
 | dnsx | Handles DNS resolution from [dnsx](https://github.com/projectdiscovery/dnsx)'s json output
+| sx | Handles SX's JSON input/output [sx](https://github.com/v-byte-cpu/sx) |
 | tbicore | Handles [LeakIX API](https://leakix.net/api-documentation)'s schema |
+
 
 ## Installation Instructions
 

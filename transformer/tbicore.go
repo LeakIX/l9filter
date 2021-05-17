@@ -61,17 +61,15 @@ func (t *TbiCoreTransformer) Decode(outputTransformer TransformerInterface) (err
 
 func (t *TbiCoreTransformer) decodeService(hostService *core.HostService) (l9format.L9Event, error) {
 	event := l9format.L9Event{
-		EventType:     "service",
-		EventSource:   "l9filter-tbi",
-		EventPipeline: []string{"l9filter-tbi"},
-		Ip:            hostService.Ip,
-		Host:          hostService.Hostname,
-		Reverse:       hostService.Reverse,
-		Port:          hostService.Port,
-		Transports:    []string{"tcp"},
-		Protocol:      hostService.Type,
-		Summary:       hostService.Data,
-		Time:          time.Unix(hostService.Date, 0),
+		EventType:  "service",
+		Ip:         hostService.Ip,
+		Host:       hostService.Hostname,
+		Reverse:    hostService.Reverse,
+		Port:       hostService.Port,
+		Transports: []string{"tcp"},
+		Protocol:   hostService.Type,
+		Summary:    hostService.Data,
+		Time:       time.Unix(hostService.Date, 0),
 		SSL: l9format.L9SSLEvent{
 			JARM:        hostService.Certificate.JARM,
 			CypherSuite: hostService.Certificate.CypherSuite,
@@ -128,8 +126,8 @@ func (t *TbiCoreTransformer) decodeService(hostService *core.HostService) (l9for
 func (t *TbiCoreTransformer) decodeLeak(hostServiceLeak *core.HostServiceLeak) (l9format.L9Event, error) {
 	event := l9format.L9Event{
 		EventType:     "leak",
-		EventSource:   "l9filter-tbi",
-		EventPipeline: []string{hostServiceLeak.Plugin, "l9filter-tbi"},
+		EventSource:   hostServiceLeak.Plugin,
+		EventPipeline: []string{hostServiceLeak.Plugin},
 		Ip:            hostServiceLeak.Ip,
 		Host:          hostServiceLeak.Hostname,
 		Reverse:       hostServiceLeak.Reverse,

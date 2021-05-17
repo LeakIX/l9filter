@@ -18,9 +18,11 @@ type TransformCommand struct {
 	InputTransformer  transformer.TransformerInterface `kong:"-"`
 	OutputTransformer transformer.TransformerInterface `kong:"-"`
 	LogWriter         io.Writer                        `kong:"-"`
+	L9Sources          []string						    `short:"l" default:"l9filter"`
 }
 
 func (cmd *TransformCommand) Run() error {
+	transformer.L9Sources = cmd.L9Sources
 	for _, trs := range transformer.Transformers {
 		if cmd.InputFormat == trs.Name() {
 			trs.SetReader(os.Stdin)

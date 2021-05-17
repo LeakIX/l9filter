@@ -14,6 +14,7 @@ var Transformers = []TransformerInterface{
 	NewTbiCoreTransformer(),
 	NewNmapTransformer(),
 	NewMasscanTransformer(),
+	NewSxTransformer(),
 }
 
 type TransformerInterface interface {
@@ -23,6 +24,8 @@ type TransformerInterface interface {
 	SetReader(reader io.Reader)
 	SetWriter(writer io.Writer)
 }
+
+var L9Sources []string
 
 type Transformer struct {
 	Reader io.Reader
