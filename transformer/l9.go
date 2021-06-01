@@ -39,6 +39,10 @@ func (t *JsonServiceTransformer) Encode(event l9format.L9Event) error {
 	for _, source := range L9Sources {
 		event.EventPipeline = append([]string{source}, event.EventPipeline...)
 	}
+	err := event.UpdateFingerprint()
+	if err != nil {
+		return err
+	}
 	return t.jsonEncoder.Encode(event)
 }
 

@@ -29,13 +29,13 @@ func (t *TbiCoreTransformer) Decode(outputTransformer TransformerInterface) (err
 	if err != nil {
 		return err
 	}
-	checkEvent := &TbiCheckEvent{}
+	checkEvent := TbiCheckEvent{}
 	err = json.Unmarshal(jsonPayload, &checkEvent)
 	if err != nil {
 		return err
 	}
 
-	if len(checkEvent.Plugin) > 0 {
+	if  len(checkEvent.Plugin) > 0 {
 		hostServiceLeak := &core.HostServiceLeak{}
 		err = json.Unmarshal(jsonPayload, &hostServiceLeak)
 		if err != nil {
@@ -47,12 +47,12 @@ func (t *TbiCoreTransformer) Decode(outputTransformer TransformerInterface) (err
 		}
 		return outputTransformer.Encode(event)
 	}
-	hostService := &core.HostService{}
+	hostService := core.HostService{}
 	err = json.Unmarshal(jsonPayload, &hostService)
 	if err != nil {
 		return err
 	}
-	event, err := t.decodeService(hostService)
+	event, err := t.decodeService(&hostService)
 	if err != nil {
 		return err
 	}
