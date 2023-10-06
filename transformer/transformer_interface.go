@@ -11,7 +11,6 @@ var Transformers = []TransformerInterface{
 	NewUrlServiceTransformer(),
 	NewHostPortTransformer(),
 	NewHumanTransformer(),
-	NewTbiCoreTransformer(),
 	NewNmapTransformer(),
 	NewMasscanTransformer(),
 	NewSxTransformer(),
